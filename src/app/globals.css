@@ -25,6 +25,18 @@
   color-scheme: dark;
 }
 
+/* Native <select> popups follow the OS theme on some Windows Chrome/Edge builds.
+   Force dark on the control and its options so the dropdown list always matches the UI. */
+select {
+  color-scheme: dark;
+}
+
+option {
+  color-scheme: dark;
+  background-color: #15171e;
+  color: #f4f4f5;
+}
+
 html,
 body {
   background: #0a0b10;

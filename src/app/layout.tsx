@@ -12,8 +12,8 @@ export const viewport: Viewport = { themeColor: "#0a0b10" };
 
 export default function RootLayout({ children }: { children: ReactNode }) {
   return (
-    <html lang="en">
-      <body className="min-h-screen bg-[#0a0b10] font-sans text-zinc-100 antialiased">
+    <html lang="en" suppressHydrationWarning>
+      <body className="min-h-screen bg-[#0a0b10] font-sans text-zinc-100 antialiased" suppressHydrationWarning>
         {children}
         <Toaster theme="dark" position="bottom-right" richColors closeButton />
       </body>
