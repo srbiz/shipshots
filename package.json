@@ -1,6 +1,28 @@
 {
-  "name": "nextjs-postgresql-template",
+  "name": "shipshots",
+  "version": "1.0.0",
   "private": true,
+  "description": "Automated App Store & Google Play screenshot and preview video generator for mobile developers and AI coding agents.",
+  "license": "MIT",
+  "author": "Govind Bhumkar",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/srbiz/shipshots.git"
+  },
+  "bugs": {
+    "url": "https://github.com/srbiz/shipshots/issues"
+  },
+  "homepage": "https://github.com/srbiz/shipshots#readme",
+  "keywords": [
+    "app-store",
+    "google-play",
+    "screenshots",
+    "fastlane",
+    "preview-video",
+    "aso",
+    "marketing-assets",
+    "nextjs"
+  ],
   "scripts": {
     "dev": "next dev",
     "build": "next build",

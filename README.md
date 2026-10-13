@@ -1,8 +1,14 @@
 # 🚀 ShipShots
 
+[![License: MIT](https://img.shields.io/badge/License-MIT-blue.svg)](LICENSE)
+[![Next.js](https://img.shields.io/badge/Next.js-16-black?logo=next.js)](https://nextjs.org/)
+[![Donate](https://img.shields.io/badge/Donate-PayPal-00457C?style=for-the-badge&logo=paypal)](https://paypal.me/GovindBhumkarIN)
+
 > **Automated App Store & Google Play screenshot and preview video generator for mobile developers and AI coding agents.**
 
 ShipShots runs as a dedicated local server alongside your mobile projects (iOS, Android, React Native, Flutter, Expo, Swift, Kotlin). It allows both humans (via an intuitive web studio) and AI coding agents (via a REST API and `/llms.txt`) to create, style, and export store-ready marketing assets and fastlane-compatible bundles in seconds.
+
+📖 **New here?** Follow the [step-by-step tutorial](docs/TUTORIAL.md) — it walks through the studio with screenshots, from first login to store-ready exports.
 
 ---
 
@@ -58,8 +64,8 @@ ShipShots runs as a dedicated local server alongside your mobile projects (iOS, 
 
 1. **Clone the repository**:
    ```bash
-   git clone https://github.com/your-username/ShipShots.git
-   cd ShipShots
+   git clone https://github.com/srbiz/shipshots.git
+   cd shipshots
    ```
 
 2. **Install dependencies**:
@@ -214,6 +220,9 @@ ShipShots/
 │       ├── catalog.ts            # Device dimensions, store specs, and layout catalog
 │       ├── render/               # Canvas rendering engines (client & server) & video muxer
 │       └── server/               # Auth handlers and session management
+├── docs/
+│   ├── TUTORIAL.md               # Step-by-step studio walkthrough (with screenshots)
+│   └── screenshots/              # Tutorial images
 ├── drizzle.config.json           # Drizzle ORM configuration
 ├── next.config.ts                # Next.js configuration
 ├── package.json
@@ -231,6 +240,17 @@ ShipShots/
 - `npm run typecheck`: Run TypeScript compiler type checking without emitting files.
 - `npx drizzle-kit push`: Sync schema changes directly to PostgreSQL.
 - `npx drizzle-kit studio`: Launch Drizzle Studio database visualizer.
+
+---
+
+## ❤️ Support the project
+
+If ShipShots saves you store-submission pain, consider fueling its development:
+
+[![Donate with PayPal](https://img.shields.io/badge/Donate_with-PayPal-00457C?style=for-the-badge&logo=paypal&logoColor=white)](https://paypal.me/GovindBhumkarIN)
+
+- **PayPal:** [paypal.me/GovindBhumkarIN](https://paypal.me/GovindBhumkarIN)
+- ⭐ Star the repo and open issues/PRs — both help more than you'd think.
 
 ---
 
