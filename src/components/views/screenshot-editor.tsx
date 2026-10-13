@@ -41,7 +41,7 @@ export function ScreenshotEditor({
   const [uploading, setUploading] = useState<Target | null>(null);
   const [modal, setModal] = useState<"export" | "templates" | "save-template" | null>(null);
   const [dropping, setDropping] = useState(false);
-  const [, force] = useState(0);
+  const [canUndoRedo, setCanUndoRedo] = useState({ undo: false, redo: false });
 
   const specRef = useRef(spec);
   const nameRef = useRef(name);
@@ -51,6 +51,10 @@ export function ScreenshotEditor({
   const past = useRef<ScreenshotSpec[]>([]);
   const future = useRef<ScreenshotSpec[]>([]);
   const lastPush = useRef(0);
+
+  const syncHist = useCallback(() => {
+    setCanUndoRedo({ undo: past.current.length > 0, redo: future.current.length > 0 });
+  }, []);
 
   const flush = useCallback(async () => {
     if (timer.current) {
@@ -96,11 +100,12 @@ export function ScreenshotEditor({
         past.current.push(specRef.current);
         if (past.current.length > 80) past.current.shift();
         future.current = [];
+        syncHist();
       }
       lastPush.current = now;
       apply({ ...specRef.current, ...patch });
     },
-    [apply],
+    [apply, syncHist],
   );
 
   const undo = useCallback(() => {
@@ -109,16 +114,16 @@ export function ScreenshotEditor({
     future.current.push(specRef.current);
     lastPush.current = 0;
     apply(prev);
-    force((n) => n + 1);
-  }, [apply]);
+    syncHist();
+  }, [apply, syncHist]);
   const redo = useCallback(() => {
     const next = future.current.pop();
     if (!next) return;
     past.current.push(specRef.current);
     lastPush.current = 0;
     apply(next);
-    force((n) => n + 1);
-  }, [apply]);
+    syncHist();
+  }, [apply, syncHist]);
 
   const rename = (v: string) => {
     nameRef.current = v;
@@ -136,6 +141,7 @@ export function ScreenshotEditor({
     nameRef.current = s.name;
     past.current = [];
     future.current = [];
+    syncHist();
     setActiveId(id);
     setSpec(s.spec);
     setName(s.name);
@@ -209,6 +215,7 @@ export function ScreenshotEditor({
       nameRef.current = created.name;
       past.current = [];
       future.current = [];
+      syncHist();
       setActiveId(created.id);
       setSpec(created.spec);
       setName(created.name);
@@ -241,10 +248,10 @@ export function ScreenshotEditor({
           {saveState === "saving" ? "Saving…" : saveState === "error" ? "Not saved" : saveState === "saved" ? "Saved" : "Unsaved"}
         </span>
         <div className="ml-auto flex flex-wrap items-center gap-1.5">
-          <Button size="icon" variant="ghost" onClick={undo} disabled={!past.current.length} title="Undo (⌘Z)">
+          <Button size="icon" variant="ghost" onClick={undo} disabled={!canUndoRedo.undo} title="Undo (⌘Z)">
             <Undo2 />
           </Button>
-          <Button size="icon" variant="ghost" onClick={redo} disabled={!future.current.length} title="Redo (⇧⌘Z)">
+          <Button size="icon" variant="ghost" onClick={redo} disabled={!canUndoRedo.redo} title="Redo (⇧⌘Z)">
             <Redo2 />
           </Button>
           <Button size="icon" variant="ghost" onClick={() => void flush()} title="Save now (⌘S)">

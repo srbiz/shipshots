@@ -35,7 +35,7 @@ export function ProjectsView({ initial, templates, openNew }: { initial: Project
   };
 
   const duplicate = async (p: ProjectDTO) => {
-    const tempId = `temp-${Date.now()}`;
+    const tempId = `temp-${crypto.randomUUID()}`;
     const temp: ProjectDTO = { ...p, id: tempId, name: `${p.name} copy`, updatedAt: new Date().toISOString() };
     setProjects((list) => [temp, ...list]);
     setPending((x) => [...x, tempId]);

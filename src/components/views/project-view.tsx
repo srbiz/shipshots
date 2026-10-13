@@ -59,7 +59,7 @@ export function ProjectView({ initial, templates, initialTab }: { initial: { pro
   };
 
   const duplicateShot = async (shot: ScreenshotDTO) => {
-    const tempId = `temp-${Date.now()}`;
+    const tempId = `temp-${crypto.randomUUID()}`;
     const idx = shots.findIndex((s) => s.id === shot.id);
     setShots((s) => [...s.slice(0, idx + 1), { ...shot, id: tempId, name: `${shot.name} copy` }, ...s.slice(idx + 1)]);
     mark(tempId, true);
@@ -171,7 +171,7 @@ export function ProjectView({ initial, templates, initialTab }: { initial: { pro
   };
 
   const duplicateVideo = async (v: VideoDTO) => {
-    const tempId = `temp-${Date.now()}`;
+    const tempId = `temp-${crypto.randomUUID()}`;
     setVideos((vs) => [{ ...v, id: tempId, name: `${v.name} copy` }, ...vs]);
     mark(tempId, true);
     try {

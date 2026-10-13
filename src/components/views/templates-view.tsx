@@ -28,7 +28,7 @@ export function TemplatesView({ initial, projects }: { initial: TemplateDTO[]; p
   const mine = templates.filter((t) => !t.isBuiltin).length;
 
   const duplicate = async (t: TemplateDTO) => {
-    const tempId = `temp-${Date.now()}`;
+    const tempId = `temp-${crypto.randomUUID()}`;
     setTemplates((x) => [...x, { ...t, id: tempId, name: `${t.name} copy`, isBuiltin: false, category: "Custom" }]);
     setPending((x) => [...x, tempId]);
     try {

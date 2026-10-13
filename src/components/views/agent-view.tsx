@@ -1,7 +1,7 @@
 "use client";
 
 import { Ban, Bot, ExternalLink, KeyRound, Pencil, Plus, Terminal, Trash2 } from "lucide-react";
-import { useEffect, useState } from "react";
+import { useState, useSyncExternalStore } from "react";
 import { toast } from "sonner";
 import { api, errMsg } from "@/lib/client/api";
 import { timeAgo } from "@/lib/export-paths";
@@ -26,17 +26,17 @@ const ENDPOINTS: [string, string, string][] = [
 
 export function AgentView({ initialKeys, projects }: { initialKeys: ApiKeyDTO[]; projects: ProjectLite[] }) {
   const [keys, setKeys] = useState(initialKeys);
-  const [origin, setOrigin] = useState("http://localhost:3000");
+  const origin = useSyncExternalStore(
+    () => () => {},
+    () => window.location.origin,
+    () => "http://localhost:3000",
+  );
   const [creating, setCreating] = useState(false);
   const [newToken, setNewToken] = useState<string | null>(null);
   const [renaming, setRenaming] = useState<ApiKeyDTO | null>(null);
   const [toDelete, setToDelete] = useState<ApiKeyDTO | null>(null);
   const [lang, setLang] = useState<"curl" | "node" | "agent">("curl");
   const [projectId, setProjectId] = useState(projects[0]?.id ?? "<project-id>");
-
-  useEffect(() => {
-    setOrigin(window.location.origin);
-  }, []);
 
   const revoke = async (k: ApiKeyDTO) => {
     const snapshot = keys;
