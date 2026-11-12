@@ -35,8 +35,12 @@ Base URL: ${base}/api/v1
      curl -X POST ${base}/api/v1/projects/<projectId>/render -H "Authorization: Bearer $SHIPSHOTS_KEY" \\
        -H "content-type: application/json" -d '{"layout":"fastlane","sizes":["iphone-69","ipad-13","android-phone"]}' -o store.zip
    Unzip at the repo root and run \`fastlane deliver\` / \`fastlane supply\`.
-6. Preview videos (MP4, 886x1920 for App Store) are encoded in the browser: open the
-   project in the UI → Preview videos → Render MP4. Configure scenes via PATCH /api/v1/videos/<id>.
+6. Preview videos (MP4, 886x1920 for App Store) are configured and rendered by the API:
+     curl -X POST ${base}/api/v1/videos/<videoId>/render -H "Authorization: Bearer $SHIPSHOTS_KEY" \\
+       -H "content-type: application/json" -d '{"save":true}' -o preview.mp4
+   Create/patch scenes first via POST /api/v1/projects/<projectId>/videos and PATCH /api/v1/videos/<id
+   ({scenes:[{screenshotId,duration,transition,motion}]}). Rendering requires ffmpeg on the server
+   (system ffmpeg, FFMPEG_PATH, or the ffmpeg-static package) and is capped at 60s per request.
 
 ## Endpoints
 GET    /api/v1/projects                      list projects
@@ -54,6 +58,7 @@ DELETE /api/v1/screenshots/:id
 GET    /api/v1/screenshots/:id/render        ?size=&format=png|jpeg&save=1&download=1
 POST   /api/v1/projects/:id/videos           create preview video
 PATCH  /api/v1/videos/:id                    {scenes:[{screenshotId,duration,transition,motion}], size?, settings?}
+POST   /api/v1/videos/:id/render             render preview video → MP4 {save?: boolean}
 GET    /api/v1/templates                     list templates
 POST   /api/v1/assets                        upload capture (multipart / JSON base64 / raw)
 GET    /api/v1/exports                       list exported files

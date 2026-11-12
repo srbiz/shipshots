@@ -20,6 +20,7 @@ const ENDPOINTS: [string, string, string][] = [
   ["GET", "/screenshots/:id/render", "Render one PNG/JPEG (?size=iphone-69&save=1)"],
   ["POST", "/projects/:id/render", "Render all sizes → ZIP (fastlane layout)"],
   ["PATCH", "/videos/:id", "Configure preview video scenes & end card"],
+  ["POST", "/videos/:id/render", "Render preview video → MP4 (requires ffmpeg)"],
   ["GET", "/exports", "List rendered files; GET /exports/:id/download"],
   ["GET", "/catalog", "Sizes, devices, layouts, mocks, fonts"],
 ];

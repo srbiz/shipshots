@@ -4,10 +4,12 @@ import { NextResponse } from "next/server";
 import { z } from "zod";
 import { db } from "@/db";
 import { screenshots, users } from "@/db/schema";
-import { defaultPreviewSize, defaultSizesFor, getOutputSize, OUTPUT_SIZES, VIDEO_SIZES, DEVICES, LAYOUTS, MOCKS, FONTS, TRANSITIONS, MOTIONS } from "@/lib/catalog";
+import { defaultPreviewSize, defaultSizesFor, getOutputSize, getVideoSize, OUTPUT_SIZES, VIDEO_SIZES, DEVICES, LAYOUTS, MOCKS, FONTS, TRANSITIONS, MOTIONS } from "@/lib/catalog";
 import { exportPath, pad2, slugify } from "@/lib/export-paths";
+import { buildOutro, videoTimeline, type VideoInput } from "@/lib/render/engine";
 import { decodeImages, renderScreenshotBuffer } from "@/lib/render/server";
-import { collectAssetIds, normalizeSpec, STYLE_KEYS, type Platform } from "@/lib/types";
+import { FfmpegUnavailableError, renderVideoMp4 } from "@/lib/render/video-server";
+import { collectAssetIds, normalizeScenes, normalizeSpec, normalizeVideoSettings, STYLE_KEYS, type Platform } from "@/lib/types";
 import { authenticateRequest, createSession, deleteSession, hashPassword, readSessionToken, sessionCookieOptions, SESSION_COOKIE, verifyPassword, type AuthUser } from "./auth";
 import * as data from "./data";
 import { HttpError } from "./data";
@@ -379,6 +381,57 @@ const routes: Route[] = [
     },
   },
   { method: "POST", path: "videos/:id/duplicate", auth: "user", handler: async (c) => json(await data.duplicateVideo(c.user.id, c.params.id), 201) },
+  {
+    method: "POST",
+    path: "videos/:id/render",
+    auth: "user",
+    doc: "Render preview video → MP4 {save?: boolean} (H.264 + silent AAC, max 60s)",
+    handler: async (c) => {
+      const b = await body(c.req, z.object({ save: z.boolean().optional() }), true);
+      const { video, project } = await data.ownedVideo(c.user.id, c.params.id);
+      const scenes = normalizeScenes(video.scenes);
+      if (!scenes.length) throw new HttpError(400, "Video has no scenes. Add screenshots to the timeline first.");
+      const settings = normalizeVideoSettings(video.settings);
+      const { screenshots: shots } = await data.getProjectDetail(c.user.id, video.projectId);
+      const shotIndex = new Map(shots.map((s, i) => [s.id, i]));
+      const inputs = scenes
+        .filter((sc) => shotIndex.has(sc.screenshotId))
+        .map((sc) => {
+          const i = shotIndex.get(sc.screenshotId)!;
+          return { spec: shots[i].spec, duration: sc.duration, transition: sc.transition, motion: sc.motion, panorama: { index: i, count: shots.length } };
+        });
+      if (!inputs.length) throw new HttpError(400, "None of the video scenes reference an existing screenshot");
+      const first = inputs[0].spec;
+      const input: VideoInput = { scenes: inputs, outro: buildOutro(project, settings, first.background, first.textColor), transitionDuration: settings.transitionDuration };
+      const size = getVideoSize(video.size);
+      const { total } = videoTimeline(input);
+      if (total > 60) throw new HttpError(422, `Video is ${total.toFixed(1)}s; rendering is capped at 60s per request. Shorten scene durations or split the video.`);
+      const images = await decodeImages(await data.loadAssetBuffers(c.user.id, [...new Set(inputs.flatMap((s) => collectAssetIds(s.spec)))]));
+      let out: Awaited<ReturnType<typeof renderVideoMp4>>;
+      try {
+        out = await renderVideoMp4(input, { width: size.width, height: size.height, family: size.family, fps: video.fps, images, appName: project.name, brandColor: project.primaryColor });
+      } catch (e) {
+        if (e instanceof FfmpegUnavailableError) throw new HttpError(503, e.message);
+        throw e;
+      }
+      const filename = `${slugify(project.name)}-${size.id}-${Date.now().toString(36)}.mp4`;
+      if (b.save !== false) {
+        await data.createExport(c.user.id, {
+          projectId: project.id,
+          kind: "video",
+          name: filename,
+          mimeType: "video/mp4",
+          width: size.width,
+          height: size.height,
+          durationSec: Math.round(out.duration * 10) / 10,
+          source: c.via === "key" ? "api" : "editor",
+          meta: { size: size.id, fps: video.fps, videoId: video.id, frames: out.frames },
+          data: out.buffer,
+        });
+      }
+      return fileResponse(c.req, out.buffer, "video/mp4", filename, c.url.searchParams.has("inline"));
+    },
+  },
 
   // ---------- Templates ----------
   { method: "GET", path: "templates", auth: "user", doc: "List templates (built-in + yours)", handler: async (c) => json(await data.listTemplates(c.user.id)) },

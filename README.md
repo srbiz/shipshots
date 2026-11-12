@@ -27,13 +27,14 @@ ShipShots runs as a dedicated local server alongside your mobile projects (iOS, 
   - Flexible layouts: `headline-top`, `headline-bottom`, `device-only`, `text-only`, `split`, `card`, `duo-diagonal`, `bleed-bottom`, and `tilt-3d`.
 - **🎬 App Store Preview Videos**:
   - Browser-accelerated timeline editor and MP4 video renderer using `mp4-muxer` and WebCodecs/Canvas.
+  - **Server-side rendering via API** (`POST /api/v1/videos/:id/render`): agents can produce the same MP4 (H.264 + silent AAC) headlessly — frames render with `@napi-rs/canvas` and encode through ffmpeg (system ffmpeg, `FFMPEG_PATH`, or `ffmpeg-static`).
   - Scene transitions, zoom/pan camera motion, and customizable duration.
 - **📦 Fastlane & CI/CD Pipeline Ready**:
   - Export a single high-resolution image or download a complete, structured ZIP formatted directly for `fastlane deliver` and `fastlane supply`.
 - **🤖 Built for AI Agents**:
   - First-class API key authentication (`Bearer $SHIPSHOTS_KEY`).
   - Self-documenting endpoint at `/llms.txt` so AI agents (Claude Code, Cursor, Antigravity, Windsurf, Copilot) can autonomously discover and call endpoints after UI code updates.
-  - A portable [Agent Skill](skills/shipshots/SKILL.md) guides agents through capture upload, screenshot creation, and Fastlane ZIP export. The server and API key must be configured separately.
+  - A portable [Agent Skill](skills/shipshots/SKILL.md) guides agents through capture upload, screenshot creation, Fastlane ZIP export, and server-side MP4 preview video rendering — with a runnable [smoke test](skills/shipshots/scripts/smoke-test.mjs) to verify an install. The server and API key must be configured separately.
 
 ---
 
@@ -188,6 +189,9 @@ All API endpoints are prefixed with `/api/v1` and require `Authorization: Bearer
 | `PATCH` | `/api/v1/screenshots/:id` | Update headline, subheadline, layout, device, background, or asset. |
 | `DELETE` | `/api/v1/screenshots/:id` | Delete a screenshot. |
 | `GET` | `/api/v1/screenshots/:id/render` | Render single image (`?size=iphone-69&format=png&save=1`). |
+| `POST` | `/api/v1/projects/:id/videos` | Create a preview video (`{name?, size?, scenes?}`). |
+| `PATCH` | `/api/v1/videos/:id` | Update preview video scenes, size, or settings. |
+| `POST` | `/api/v1/videos/:id/render` | Render preview video → MP4 (`{save?: boolean}`; requires ffmpeg; max 60s per request). |
 | `POST` | `/api/v1/assets` | Upload raw image capture (`multipart/form-data`, JSON base64, or raw binary). |
 | `GET` | `/api/v1/templates` | List pre-configured and custom screenshot templates. |
 | `GET` | `/api/v1/exports` | View export history and generated assets. |
