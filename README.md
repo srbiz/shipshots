@@ -33,6 +33,7 @@ ShipShots runs as a dedicated local server alongside your mobile projects (iOS, 
 - **🤖 Built for AI Agents**:
   - First-class API key authentication (`Bearer $SHIPSHOTS_KEY`).
   - Self-documenting endpoint at `/llms.txt` so AI agents (Claude Code, Cursor, Antigravity, Windsurf, Copilot) can autonomously discover and call endpoints after UI code updates.
+  - A portable [Agent Skill](skills/shipshots/SKILL.md) guides agents through capture upload, screenshot creation, and Fastlane ZIP export. The server and API key must be configured separately.
 
 ---
 
